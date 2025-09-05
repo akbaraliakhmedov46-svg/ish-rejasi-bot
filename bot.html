@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Иш Режаси Бот</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --light-bg: #f8fafc;
+            --dark-text: #1e293b;
+            --border-color: #e2e8f0;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+        
+        body {
+            background-color: var(--light-bg);
+            color: var(--dark-text);
+            line-height: 1.6;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .container {
+            max-width: 100%;
+            padding: 15px;
+            margin: 0 auto;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary-color), #1d4ed8);
+            color: white;
+            padding: 18px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .nav-tabs {
+            display: flex;
+            background-color: white;
+            overflow-x: auto;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 60px;
+            z-index: 90;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .nav-tab {
+            padding: 14px 20px;
+            white-space: nowrap;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .nav-tab.active {
+            border-bottom: 3px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 20px 0;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border-color);
+        }
+        
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--dark-text);
+            display: flex;
+            align-items: center;
+        }
+        
+        .card-title i {
+            margin-right: 10px;
+            font-size: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 18px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: var(--secondary-color);
+            font-size: 14px;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            margin-top: 10px;
+            transition: all 0.3s;
+        }
+        
+        button:hover {
+            background-color: #1d4ed8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button i {
+            margin-right: 8px;
+        }
+        
+        .section-icon {
+            font-size: 24px;
+            margin-right: 10px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 18px;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 10px 0;
+            color: var(--primary-color);
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: var(--secondary-color);
+        }
+        
+        .order-list {
+            list-style: none;
+        }
+        
+        .order-item {
+            background-color: white;
+            border-radius: 10px;
+            padding: 18px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border-left: 4px solid var(--primary-color);
+            transition: transform 0.2s;
+        }
+        
+        .order-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .order-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--dark-text);
+        }
+        
+        .order-details {
+            font-size: 14px;
+            color: var(--secondary-color);
+            margin-bottom: 10px;
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background-color: #e2e8f0;
+            border-radius: 5px;
+            margin: 12px 0;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), #3b82f6);
+            border-radius: 5px;
+            transition: width 0.5s ease;
+        }
+        
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .message {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        .success-message {
+            background-color: #ecfdf5;
+            color: var(--success-color);
+            border: 1px solid #a7f3d0;
+        }
+        
+        .error-message {
+            background-color: #fef2f2;
+            color: var(--danger-color);
+            border: 1px solid #fecaca;
+        }
+        
+        .warning-message {
+            background-color: #fffbeb;
+            color: var(--warning-color);
+            border: 1px solid #fed7aa;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--dark-text);
+        }
+        
+        .section-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+        }
+        
+        .btn-secondary {
+            background-color: white;
+            color: var(--secondary-color);
+            border: 1px solid var(--border-color);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        @media (min-width: 768px) {
+            .container {
+                max-width: 800px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .container {
+                max-width: 1000px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Иш Режаси Бот</h1>
+        <p id="current-date">Бугун: ...</p>
+    </header>
+    
+    <div class="nav-tabs">
+        <div class="nav-tab active" data-tab="dashboard">Асосий</div>
+        <div class="nav-tab" data-tab="sections">Бўлимлар</div>
+        <div class="nav-tab" data-tab="orders">Буюртмалар</div>
+        <div class="nav-tab" data-tab="reports">Хисоботлар</div>
+        <div class="nav-tab" data-tab="analytics">Таҳлил</div>
+    </div>
+    
+    <div class="container">
+        <!-- Асосий саҳифа -->
+        <div class="tab-content active" id="dashboard">
+            <div class="card">
+                <div class="card-title">
+                    <span>📊 Умумий маълумот</span>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="daily-work">0</div>
+                        <div class="stat-label">Кунлик иш</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="weekly-work">0</div>
+                        <div class="stat-label">Ҳафталик иш</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="monthly-plan">0%</div>
+                        <div class="stat-label">Ойлик режа</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="total-orders">0</div>
+                        <div class="stat-label">Буюртмалар</div>
+                    </div>
+                </div>
+                
+                <button id="refreshData">
+                    <i>🔄</i> Маълумотларни янгилаш
+                </button>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">
+                    <span>🚀 Тез огирлар</span>
+                </div>
+                
+                <button id="quickDailyWork">
+                    <i>📝</i> Кунлик иш қўшиш
+                </button>
+                
+                <button id="quickAddOrder">
+                    <i>📦</i> Янги буюртма
+                </button>
+                
+                <button id="quickReport">
+                    <i>📊</i> Кунлик хисобот
+                </button>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">
+                    <span>📈 Ойлик режа бажарилиши</span>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="monthlyProgressChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Бўлимлар саҳифаси -->
+        <div class="tab-content" id="sections">
+            <div class="card">
+                <div class="card-title">
+                    <span class="section-icon">✂️</span> Бичиш
+                </div>
+                
+                <div class="form-group">
+                    <label for="bichish-ish">Иш сони</label>
+                    <input type="number" id="bichish-ish" placeholder="Иш микдорини киритинг">
+                </div>
+                
+                <div class="form-group">
+                    <label for="bichish-hodim">Ходим сони</label>
+                    <input type="number" id="bichish-hodim" placeholder="Ходимлар сонини киритинг">
+                </div>
+                
+                <button data-section="bichish">
+                    <i>✅</i> Сақлаш
+                </button>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">
+                    <span class="section-icon">📑</span> Тасниф
+                </div>
+                
+                <div class="form-group">
+                    <label for="tasnif-dikimga">Дикимга қилинган иш</label>
+                    <input type="number" id="tasnif-dikimga" placeholder="Дикимга қилинган иш сони">
+                </div>
+                
+                <div class="form-group">
+                    <label for="tasnif-pechat">Печат қилинган иш</label>
+                    <input type="number" id="tasnif-pechat" placeholder="Печат қилинган иш сони">
+                </div>
+                
+                <div class="form-group">
+                    <label for="tasnif-vishivka">Вишивка қилинган иш</label>
+                    <input type="number" id="tasnif-vishivka" placeholder="Вишивка қилинган иш сони">
+                </div>
+                
+                <div class="form-group">
+                    <label for="tasnif-hodim">Ходим сони</label>
+                    <input type="number" id="tasnif-hodim" placeholder="Ходимлар сонини киритинг">
+                </div>
+                
+                <button data-section="tasnif">
+                    <i>✅</i> Сақлаш
+                </button>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">
+                    <span class="section-icon">🧵</span> Тикув
+                </div>
+                
+                <div class="form-group">
+                    <label for="tikuv-ish">Иш сони</label>
+                    <input type="number" id="tikuv-ish" placeholder="Иш микдорини киритинг">
+                </div>
+                
+                <div class="form-group">
+                    <label for="tikuv-hodim">Ходим сони</label>
+                    <input type="number" id="tikuv-hodim" placeholder="Ходимлар сонини киритинг">
+                </div>
+                
+                <div class="form-group">
+                    <label for="tikuv-oyoqchi">Оёқчи ходим сони</label>
+                    <input type="number" id="tikuv-oyoqchi" placeholder="Оёқчи ходимлар сонини киритинг">
+                </div>
+                
+                <button data-section="tikuv">
+                    <i>✅</i> Сақлаш
+                </button>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">
+                    <span class="section-icon">📦</span> Қадоқлаш
+                </div>
+                
+                <div class="form-group">
+                    <label for="qadoqlash-ish">Иш сони</label>
+                    <input type="number" id="qadoqlash-ish" placeholder="Иш микдорини киритинг">
+                </div>
+                
+                <div class="form-group">
+                    <label for="qadoqlash-hodim">Ходим сони</label>
+                    <input type="number" id="qadoqlash-hodim" placeholder="Ходимлар сонини киритинг">
+                </div>
+                
+                <button data-section="qadoqlash">
+                    <i>✅</i> Сақлаш
+                </button>
+            </div>
+        </div>
+        
+        <!-- Буюртмалар саҳифаси -->
+        <div class="tab-content" id="orders">
+            <div class="card">
+                <div class="card-title">
+                    <span>📦 Янги буюртма</span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="order-name">Буюртма номи</label>
+                    <input type="text" id="order-name" placeholder="Буюртма номини киритинг">
+                </div>
+                
+                <div class="form-group">
+                    <label for="order-quantity">Миқдори</label>
+                    <input type="number" id="order-quantity" placeholder="Умумий микдорни киритинг">
+                </div>
+                
+                <div class="form-group">
+                    <label for="order-deadline">Муддати</label>
+                    <input type="date" id="order-deadline">
+                </div>
+                
+                <div class="form-group">
+                    <label for="order-section">Бўлим</label>
+                    <select id="order-section">
+                        <option value="Бичиш">Бичиш</option>
+                        <option value="Тасниф">Тасниф</option>
+                        <option value="Тикув">Тикув</option>
+                        <option value="Қадоқлаш">Қадоқлаш</option>
+                    </select>
+                </div>
+                
+                <button id="add-order-btn">
+                    <i>➕</i> Буюртма қўшиш
+                </button>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">
+                    <span>📋 Буюртмалар рўйхати</span>
+                </div>
+                
+                <div class="loader hidden" id="orders-loader"></div>
+                
+                <ul class="order-list" id="orders-list">
+                    <!-- Буюртмалар рўйхати JavaScript орқали тулади -->
+                </ul>
+                
+                <button id="refresh-orders">
+                    <i>🔄</i> Янгилаш
+                </button>
+            </div>
+        </div>
+        
+        <!-- Хисоботлар саҳифаси -->
+        <div class="tab-content" id="reports">
+            <div class="card">
+                <div class="card-title">
+                    <span>📊 Хисобот турлари</span>
+                </div>
+                
+                <button data-report="daily">
+                    <i>📅</i> Кунлик хисобот
+                </button>
+                
+                <button data-report="weekly">
+                    <i>📆</i> Ҳафталик хисобот
+                </button>
+                
+                <button data-report="monthly">
+                    <i>🗓️</i> Ойлик хисобот
+                </button>
+                
+                <button data-report="orders">
+                    <i>📋</i> Буюртмалар хисоботи
+                </button>
+            </div>
+            
+            <div class="card hidden" id="report-result-card">
+                <div class="card-title">
+                    <span>📄 Хисобот натижаси</span>
+                </div>
+                
+                <div id="report-result">
+                    <!-- Хисобот натижаси шу ерда кўринади -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Таҳлил саҳифаси -->
+        <div class="tab-content" id="analytics">
+            <div class="card">
+                <div class="card-title">
+                    <span>📈 Иш чиқими таҳлили</span>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="productivityChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">
+                    <span>📊 Бўлимлар тақсимоти</span>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="sectionsChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">
+                    <span>📅 Ҳафталик иш чиқими</span>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="weeklyTrendChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div id="message-container"></div>
+    </div>
+
+    <script>
+        // Telegram Web App инициализация
+        let tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.enableClosingConfirmation();
+        
+        // Joriy sana
+        document.getElementById('current-date').textContent = 'Бугун: ' + new Date().toLocaleDateString('uz-UZ', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        });
+        
+        // График объектлари
+        let monthlyProgressChart = null;
+        let productivityChart = null;
+        let sectionsChart = null;
+        let weeklyTrendChart = null;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Навигация
+            const navTabs = document.querySelectorAll('.nav-tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            navTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabId = tab.getAttribute('data-tab');
+                    
+                    // Актив классларни ўзгартириш
+                    navTabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(t => t.classList.remove('active'));
+                    
+                    tab.classList.add('active');
+                    document.getElementById(tabId).classList.add('active');
+                    
+                    // Analytics tabini ochganda grafiklarni yangilash
+                    if (tabId === 'analytics') {
+                        initCharts();
+                    }
+                });
+            });
+            
+            // Бўлимлар маълумотларини юбориш
+            const sectionButtons = document.querySelectorAll('button[data-section]');
+            sectionButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const section = button.getAttribute('data-section');
+                    sendSectionData(section);
+                });
+            });
+            
+            // Янги буюртма қўшиш
+            document.getElementById('add-order-btn').addEventListener('click', addNewOrder);
+            
+            // Хисоботлар
+            const reportButtons = document.querySelectorAll('button[data-report]');
+            reportButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const reportType = button.getAttribute('data-report');
+                    getReport(reportType);
+                });
+            });
+            
+            // Маълумотларни янгилаш
+            document.getElementById('refreshData').addEventListener('click', refreshData);
+            document.getElementById('refresh-orders').addEventListener('click', loadOrders);
+            
+            // Тез огирлар
+            document.getElementById('quickDailyWork').addEventListener('click', () => {
+                navTabs.forEach(t => t.classList.remove('active'));
+                tabContents.forEach(t => t.classList.remove('active'));
+                
+                document.querySelector('[data-tab="sections"]').classList.add('active');
+                document.getElementById('sections').classList.add('active');
+            });
+            
+            document.getElementById('quickAddOrder').addEventListener('click', () => {
+                navTabs.forEach(t => t.classList.remove('active'));
+                tabContents.forEach(t => t.classList.remove('active'));
+                
+                document.querySelector('[data-tab="orders"]').classList.add('active');
+                document.getElementById('orders').classList.add('active');
+            });
+            
+            document.getElementById('quickReport').addEventListener('click', () => {
+                getReport('daily');
+            });
+            
+            // Дастлабки маълумотларни юклав олиш
+            refreshData();
+            loadOrders();
+            initCharts();
+            
+            // 30 секундда бир маълумотларни автoматик янгилаш
+            setInterval(refreshData, 30000);
+        });
+        
+        // Функциялар
+        function sendSectionData(section) {
+            showLoader();
+            
+            let data = { action: 'add_section_data', section: section };
+            
+            switch(section) {
+                case 'bichish':
+                    data.ish_soni = document.getElementById('bichish-ish').value;
+                    data.hodim_soni = document.getElementById('bichish-hodim').value;
+                    break;
+                case 'tasnif':
+                    data.dikimga = document.getElementById('tasnif-dikimga').value;
+                    data.pechat = document.getElementById('tasnif-pechat').value;
+                    data.vishivka = document.getElementById('tasnif-vishivka').value;
+                    data.hodim_soni = document.getElementById('tasnif-hodim').value;
+                    break;
+                case 'tikuv':
+                    data.ish_soni = document.getElementById('tikuv-ish').value;
+                    data.hodim_soni = document.getElementById('tikuv-hodim').value;
+                    data.oyoqchi_hodim = document.getElementById('tikuv-oyoqchi').value;
+                    break;
+                case 'qadoqlash':
+                    data.ish_soni = document.getElementById('qadoqlash-ish').value;
+                    data.hodim_soni = document.getElementById('qadoqlash-hodim').value;
+                    break;
+            }
+            
+            // Маълумотларни текшириш
+            let isValid = true;
+            for (let key in data) {
+                if (key !== 'action' && key !== 'section' && (!data[key] || data[key] === '0')) {
+                    isValid = false;
+                    break;
+                }
+            }
+            
+            if (!isValid) {
+                showMessage('❌ Илтимос, барча майдонларни тўлдиринг', 'error');
+                hideLoader();
+                return;
+            }
+            
+            tg.sendData(JSON.stringify(data));
+            showMessage('✅ Маълумотлар муваффақиятли сақланди!', 'success');
+            
+            // Формани тозалаш
+            switch(section) {
+                case 'bichish':
+                    document.getElementById('bichish-ish').value = '';
+                    document.getElementById('bichish-hodim').value = '';
+                    break;
+                case 'tasnif':
+                    document.getElementById('tasnif-dikimga').value = '';
+                    document.getElementById('tasnif-pechat').value = '';
+                    document.getElementById('tasnif-vishivka').value = '';
+                    document.getElementById('tasnif-hodim').value = '';
+                    break;
+                case 'tikuv':
+                    document.getElementById('tikuv-ish').value = '';
+                    document.getElementById('tikuv-hodim').value = '';
+                    document.getElementById('tikuv-oyoqchi').value = '';
+                    break;
+                case 'qadoqlash':
+                    document.getElementById('qadoqlash-ish').value = '';
+                    document.getElementById('qadoqlash-hodim').value = '';
+                    break;
+            }
+            
+            // Маълумотларни янгилаш
+            setTimeout(() => {
+                refreshData();
+                hideLoader();
+            }, 1000);
+        }
+        
+        function addNewOrder() {
+            const name = document.getElementById('order-name').value;
+            const quantity = document.getElementById('order-quantity').value;
+            const deadline = document.getElementById('order-deadline').value;
+            const section = document.getElementById('order-section').value;
+            
+            if (!name || !quantity || !deadline) {
+                showMessage('❌ Илтимос, барча майдонларни тўлдиринг', 'error');
+                return;
+            }
+            
+            const data = {
+                action: 'add_order',
+                name: name,
+                quantity: quantity,
+                deadline: deadline,
+                section: section
+            };
+            
+            tg.sendData(JSON.stringify(data));
+            showMessage('✅ Буюртма муваффақиятли қўшилди!', 'success');
+            
+            // Формани тозалаш
+            document.getElementById('order-name').value = '';
+            document.getElementById('order-quantity').value = '';
+            document.getElementById('order-deadline').value = '';
+            
+            // Буюртмалар рўйхатини янгилаш
+            setTimeout(loadOrders, 1000);
+        }
+        
+        function getReport(reportType) {
+            showLoader();
+            const data = { action: 'get_report', report_type: reportType };
+            tg.sendData(JSON.stringify(data));
+            
+            // Натижа кардасини кўрсатиш
+            document.getElementById('report-result-card').classList.remove('hidden');
+            document.getElementById('report-result').innerHTML = 
+                '<div class="loader"></div><p>Хисобот тайёрланимоқда...</p>';
+            
+            hideLoader();
+        }
+        
+        function refreshData() {
+            showLoader();
+            const data = { action: 'refresh_data' };
+            tg.sendData(JSON.stringify(data));
+            
+            // Статистикани янгилаш
+            updateDashboard();
+        }
+        
+        function loadOrders() {
+            const ordersList = document.getElementById('orders-list');
+            const loader = document.getElementById('orders-loader');
+            
+            ordersList.innerHTML = '';
+            loader.classList.remove('hidden');
+            
+            // Сервердан буюртмалар рўйхатини олиш учун сўров юбориш
+            const data = { action: 'get_orders' };
+            tg.sendData(JSON.stringify(data));
+        }
+        
+        function updateDashboard() {
+            // Сервердан статистика маълумотларини олиш
+            const data = { action: 'get_dashboard_data' };
+            tg.sendData(JSON.stringify(data));
+        }
+        
+        function initCharts() {
+            // Сервердан график маълумотларини олиш
+            const data = { action: 'get_chart_data' };
+            tg.sendData(JSON.stringify(data));
+        }
+        
+        function createMonthlyProgressChart(data) {
+            const ctx = document.getElementById('monthlyProgressChart').getContext('2d');
+            
+            if (monthlyProgressChart) {
+                monthlyProgressChart.destroy();
+            }
+            
+            monthlyProgressChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: 'Режа',
+                        data: data.plans,
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }, {
+                        label: 'Бажарилди',
+                        data: data.actuals,
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Иш микдори'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function createProductivityChart(data) {
+            const ctx = document.getElementById('productivityChart').getContext('2d');
+            
+            if (productivityChart) {
+                productivityChart.destroy();
+            }
+            
+            productivityChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.days,
+                    datasets: [{
+                        label: 'Бичиш',
+                        data: data.bichish,
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        tension: 0.1,
+                        fill: false
+                    }, {
+                        label: 'Тасниф',
+                        data: data.tasnif,
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        tension: 0.1,
+                        fill: false
+                    }, {
+                        label: 'Тикув',
+                        data: data.tikuv,
+                        borderColor: 'rgba(255, 206, 86, 1)',
+                        tension: 0.1,
+                        fill: false
+                    }, {
+                        label: 'Қадоқлаш',
+                        data: data.qadoqlash,
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        tension: 0.1,
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Иш микдори'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function createSectionsChart(data) {
+            const ctx = document.getElementById('sectionsChart').getContext('2d');
+            
+            if (sectionsChart) {
+                sectionsChart.destroy();
+            }
+            
+            sectionsChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        data: data.values,
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.7)',
+                            'rgba(54, 162, 235, 0.7)',
+                            'rgba(255, 206, 86, 0.7)',
+                            'rgba(75, 192, 192, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+        
+        function createWeeklyTrendChart(data) {
+            const ctx = document.getElementById('weeklyTrendChart').getContext('2d');
+            
+            if (weeklyTrendChart) {
+                weeklyTrendChart.destroy();
+            }
+            
+            weeklyTrendChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.days,
+                    datasets: [{
+                        label: 'Иш чиқими',
+                        data: data.values,
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Иш микдори'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function showMessage(text, type) {
+            const messageContainer = document.getElementById('message-container');
+            const message = document.createElement('div');
+            message.className = `message ${type}-message`;
+            message.textContent = text;
+            
+            messageContainer.appendChild(message);
+            
+            // Хабарни 5 секунддан сўнг йўқотиш
+            setTimeout(() => {
+                message.remove();
+            }, 5000);
+        }
+        
+        function showLoader() {
+            // Йуклаш жараёнини кўрсатиш
+            document.body.style.opacity = '0.7';
+            document.body.style.pointerEvents = 'none';
+        }
+        
+        function hideLoader() {
+            // Йуклаш жараёнини яшириш
+            document.body.style.opacity = '1';
+            document.body.style.pointerEvents = 'auto';
+        }
+        
+        // Telegram Web App дан келган маълумотларни қайта ишлаш
+        tg.onEvent('webAppDataReceived', (event) => {
+            try {
+                const data = JSON.parse(event.data);
+                
+                if (data.action === 'refresh_data_response') {
+                    // Статистика маълумотларини янгилаш
+                    if (data.daily_work) document.getElementById('daily-work').textContent = data.daily_work;
+                    if (data.weekly_work) document.getElementById('weekly-work').textContent = data.weekly_work;
+                    if (data.monthly_plan) document.getElementById('monthly-plan').textContent = data.monthly_plan + '%';
+                    if (data.total_orders) document.getElementById('total-orders').textContent = data.total_orders;
+                    
+                    hideLoader();
+                    showMessage('✅ Маълумотлар янгиланди!', 'success');
+                }
+                else if (data.action === 'get_orders_response') {
+                    // Буюртмалар рўйхатини янгилаш
+                    const ordersList = document.getElementById('orders-list');
+                    const loader = document.getElementById('orders-loader');
+                    
+                    ordersList.innerHTML = '';
+                    
+                    if (data.orders && data.orders.length > 0) {
+                        data.orders.forEach(order => {
+                            const percentage = (order.done / order.total) * 100;
+                            const listItem = document.createElement('li');
+                            listItem.className = 'order-item';
+                            listItem.innerHTML = `
+                                <div class="order-title">${order.name}</div>
+                                <div class="order-details">
+                                    ${order.done}/${order.total} та (${percentage.toFixed(1)}%)
+                                    <br>Бўлим: ${order.section}
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: ${percentage}%"></div>
+                                </div>
+                                <div class="order-details">
+                                    Муддат: ${order.deadline} (Қолган кун: ${order.daysLeft})
+                                </div>
+                            `;
+                            ordersList.appendChild(listItem);
+                        });
+                    } else {
+                        ordersList.innerHTML = '<li class="order-item">Ҳозирча буюртмалар мавжуд эмас</li>';
+                    }
+                    
+                    loader.classList.add('hidden');
+                }
+                else if (data.action === 'get_report_response') {
+                    // Хисобот натижасини кўрсатиш
+                    document.getElementById('report-result-card').classList.remove('hidden');
+                    document.getElementById('report-result').innerHTML = 
+                        `<pre style="white-space: pre-wrap;">${data.report}</pre>`;
+                }
+                else if (data.action === 'get_dashboard_data_response') {
+                    // Dashboard маълумотларини янгилаш
+                    if (data.daily_work) document.getElementById('daily-work').textContent = data.daily_work;
+                    if (data.weekly_work) document.getElementById('weekly-work').textContent = data.weekly_work;
+                    if (data.monthly_plan) document.getElementById('monthly-plan').textContent = data.monthly_plan + '%';
+                    if (data.total_orders) document.getElementById('total-orders').textContent = data.total_orders;
+                    
+                    hideLoader();
+                }
+                else if (data.action === 'get_chart_data_response') {
+                    // График маълумотларини қайта ишлаш
+                    if (data.monthly_progress) {
+                        createMonthlyProgressChart(data.monthly_progress);
+                    }
+                    
+                    if (data.productivity) {
+                        createProductivityChart(data.productivity);
+                    }
+                    
+                    if (data.sections) {
+                        createSectionsChart(data.sections);
+                    }
+                    
+                    if (data.weekly_trend) {
+                        createWeeklyTrendChart(data.weekly_trend);
+                    }
+                }
+            } catch (error) {
+                console.error('Маълумотларни қайта ishlashda xatolik:', error);
+                showMessage('❌ Маълумотларни қайта ishlashda xatolik yuz berdi', 'error');
+            }
+        });
+    </script>
+</body>
+</html>
